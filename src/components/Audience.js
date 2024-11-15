@@ -11,7 +11,7 @@ const Audience = () => {
     const [audienceSize, setAudienceSize] = useState(0);
     const [calculatedAudienceUsers, setCalcultedAudienceUsers] = useState([]);
     const [audienceName, setAudienceName] = useState("");
-    const [conditionType, setConditionType] =useState("");
+    const [conditionType, setConditionType] =useState("and");
 
     const handleSaveSegment = async () => {
         try {

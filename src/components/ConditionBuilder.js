@@ -3,7 +3,7 @@ import '../App.css'
 
 function ConditionBuilder({ conditions, setConditions, setConditionType }) {
     const addCondition = () => {
-        setConditions([...conditions, { field: '', operator: '', value: '' }]);
+        setConditions([...conditions, { field: 'totalSpending', operator: '>', value: '' }]);
     };
 
     const handleConditionChange = (index, key, value) => {
@@ -12,6 +12,7 @@ function ConditionBuilder({ conditions, setConditions, setConditionType }) {
         setConditions(newConditions);
     };
 
+    console.log("condition : : ", conditions);
     return (
         <div className='conditionContainer'>
             <h3>Define Audience Segment</h3>

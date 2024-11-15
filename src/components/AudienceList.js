@@ -1,115 +1,124 @@
 // frontend/src/components/AudienceSegmentList.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Card from './Card';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../App.css';
 
 const AudienceSegmentList = ({ setShowForm, setShowCampaignData }) => {
     const [segments, setSegments] = useState([]);
-    const [message, setMessage] = useState('');
-    const [toggleSendBtn, setToggleSendBtn] = useState(false);
-    const [showText, setShowText] = useState('');
+    const [activeMessageInputs, setActiveMessageInputs] = useState({}); // Track state for each segment
 
-    const openCampaignList = (segmentId) => {
-        setShowCampaignData({
-            show: true,
-            audienceId: segmentId
-        })
-        setShowForm(6);
-    }
-
-    const createCommunication = async(segment, index) => {
-        const communicationData = { audienceSegmentId : segment?._id,  users: segment?.users };
+    const createCommunication = async (segmentId) => {
+        const communicationData = { audienceSegmentId: segmentId };
 
         try {
-            // Mock API call
             const response = await axios.post('http://localhost:7000/api/v1/audience/communication/create', communicationData);
-
             if (response?.data?.success) {
-                // setOrder(initialFormState);  // Reset the form after success
                 toast.success('Communication Created Successfully');
-                setMessage("");
-                // setAudienceSegmentId('');
-                // setName('');
             }
-
         } catch (error) {
             toast.error('Failed to create Campaign.');
         }
 
+        setActiveMessageInputs((prevState) => ({
+            ...prevState,
+            [segmentId]: { ...prevState[segmentId], toggleSend: true },
+        }));
+    };
 
-        setToggleSendBtn(true);
-        setShowText(index);
-    }
-
-    const handleSendMessage = async(segment) => {
-
-        const communicationData = { audienceSegmentId : segment?._id,  message };
+    const handleSendMessage = async (segmentId) => {
+        const message = activeMessageInputs[segmentId]?.message || '';
+        const communicationData = { audienceSegmentId: segmentId, message };
 
         try {
-            // Mock API call
             const response = await axios.post('http://localhost:7000/api/v1/audience/send/text', communicationData);
-
             if (response?.data?.success) {
                 toast.success('Message sent Successfully');
-                setMessage("");
-               
+                setActiveMessageInputs((prevState) => ({
+                    ...prevState,
+                    [segmentId]: { ...prevState[segmentId], message: '' },
+                }));
             }
         } catch (error) {
             toast.error('Failed to send message.');
         }
-    }
+    };
+
+    const handleInputChange = (segmentId, value) => {
+        setActiveMessageInputs((prevState) => ({
+            ...prevState,
+            [segmentId]: { ...prevState[segmentId], message: value },
+        }));
+    };
 
     useEffect(() => {
         const fetchSegments = async () => {
-
-            const response = await axios.get('http://localhost:7000/api/v1/audience/');
-            if (response?.data?.success) {
-                setSegments(response.data.data);
+            try {
+                const response = await axios.get('http://localhost:7000/api/v1/audience/');
+                if (response?.data?.success) {
+                    setSegments(response.data.data);
+                }
+            } catch (error) {
+                toast.error('Failed to fetch segments.');
             }
         };
         fetchSegments();
     }, []);
 
-    console.log("vshjhj : ", showText)
     return (
-        <div>
+        <div className="AudienceList">
             <h2>Audience Segments</h2>
-            <div className="card-container" >
-                {segments.map((segment, index) => (
-                    <div >
-                        <div onClick={() => { openCampaignList(segment._id) }}>
-                            <Card
-                                key={segment._id}
-                                title={segment.name}
-                                content={`Conditions: ${JSON.stringify(segment.conditions)}`}
-                                segment={segment}
-                            />
-                        </div>
+            <div className="card-container">
+                {segments.map((segment) => (
+                    <div className="segment-card" key={segment._id}>
+                        <div className="segment-details">
+                            <h3 className="segment-title">{segment.name}</h3>
 
-                        <div>
-                            {
-                                toggleSendBtn && index == showText ? <div style={{ display: 'flex', maxWidth: '600px', width: '100%', alignItems: 'center', margin: '0 auto', justifyContent: 'center' }}>
+                            <p>
+                                <strong>Audience Size:</strong> {segment.audienceSize}
+                            </p>
+                            <p>
+                                <strong>Users:</strong>
+                                <ul className="user-list">
+                                    {segment.users.map((user) => (
+                                        <li key={user._id}>
+                                            {user.name} ({user.email})
+                                        </li>
+                                    ))}
+                                </ul>
+                            </p>
+                        </div>
+                        <div className="actions">
+                            {activeMessageInputs[segment._id]?.toggleSend ? (
+                                <div className="message-input">
                                     <label>Message</label>
                                     <input
                                         type="text"
                                         name="message"
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
+                                        value={activeMessageInputs[segment._id]?.message || ''}
+                                        onChange={(e) => handleInputChange(segment._id, e.target.value)}
                                         required
-                                        style={{ width: '100%', padding: '8px', margin: '5px 0px', maxWidth: '200px', width: '100%', padding: '8px' }}
                                     />
-                                </div> : ""
-                            }
+                                </div>
+                            ) : null}
+                            <button
+                                className={
+                                    activeMessageInputs[segment._id]?.toggleSend ? 'send-btn' : 'action-btn'
+                                }
+                                onClick={() => {
+                                    activeMessageInputs[segment._id]?.toggleSend
+                                        ? handleSendMessage(segment._id)
+                                        : createCommunication(segment._id);
+                                }}
+                            >
+                                {activeMessageInputs[segment._id]?.toggleSend ? 'Send Message' : 'Want to Send Message'}
+                            </button>
                         </div>
-
-
-                        <button className={toggleSendBtn&& index == showText  ? "calculateButton" : "logout-button"} onClick={() => { toggleSendBtn ? handleSendMessage(segment) : createCommunication(segment, index) }}>{toggleSendBtn && index == showText ?  "Send Message" :"Want to Send Message" }  </button>
                     </div>
                 ))}
             </div>
-            <ToastContainer  />
+            <ToastContainer />
         </div>
     );
 };

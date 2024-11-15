@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../App.css'
 
-const CampaignForm = () => {
+const CampaignForm = ({setShowForm}) => {
     const [audience, setAudience] = useState([]);
     const [name, setName] = useState('');
     const [message, setMessage] = useState('');
@@ -14,9 +14,10 @@ const CampaignForm = () => {
     const [endDate, setEndDate] = useState('');
 
     const handleShowCampaignList=()=>{
-
+        console.log("hchsdhjgjd")
+        setShowForm(6);
     }
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const campaignData = { name, audienceSegmentId, message, startDate, endDate };

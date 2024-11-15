@@ -52,10 +52,10 @@ function Dashboard({ user, setUser }) {
                         showForm == obj?.audience ?
                             <Audience /> :
                             showForm == obj?.campaign ?
-                                <Campaign /> :
+                                <Campaign setShowForm={setShowForm}/> :
                                 showForm == obj?.audienceList ?
                                     <AudienceSegmentList setShowForm={setShowForm} setShowCampaignData={setShowCampaignData} /> :
-                                    showForm == obj?.campaignList && showCampaign?.show == true ?
+                                    showForm == obj?.campaignList  ?
                                         <CampaignList /> :
                                         ""
             }
