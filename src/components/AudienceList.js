@@ -9,8 +9,8 @@ const AudienceSegmentList = ({ setShowForm, setShowCampaignData }) => {
     const [segments, setSegments] = useState([]);
     const [activeMessageInputs, setActiveMessageInputs] = useState({}); // Track state for each segment
 
-    const createCommunication = async (segmentId) => {
-        const communicationData = { audienceSegmentId: segmentId };
+    const createCommunication = async (segment) => {
+        const communicationData = { audienceSegmentId: segment._id, users: segment.users };
 
         try {
             const response = await axios.post('http://localhost:7000/api/v1/audience/communication/create', communicationData);
@@ -23,7 +23,7 @@ const AudienceSegmentList = ({ setShowForm, setShowCampaignData }) => {
 
         setActiveMessageInputs((prevState) => ({
             ...prevState,
-            [segmentId]: { ...prevState[segmentId], toggleSend: true },
+            [segment._id]: { ...prevState[segment._id], toggleSend: true },
         }));
     };
 
@@ -109,7 +109,7 @@ const AudienceSegmentList = ({ setShowForm, setShowCampaignData }) => {
                                 onClick={() => {
                                     activeMessageInputs[segment._id]?.toggleSend
                                         ? handleSendMessage(segment._id)
-                                        : createCommunication(segment._id);
+                                        : createCommunication(segment);
                                 }}
                             >
                                 {activeMessageInputs[segment._id]?.toggleSend ? 'Send Message' : 'Want to Send Message'}

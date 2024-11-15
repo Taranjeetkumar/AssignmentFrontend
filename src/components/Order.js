@@ -1,11 +1,11 @@
 // CreateOrderForm.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const OrderForm = ({ customers }) => {
-    console.log("sdhjfgyusfgyufgyu : : ", customers);
+const OrderForm = () => {
+    const [customers, setCustomers] = useState([]);
     const initialFormState = {
         customerId: '',
         items: [{ productName: '', quantity: 1, price: 0 }]
@@ -56,6 +56,18 @@ const OrderForm = ({ customers }) => {
 
     console.log('Order Data:', order);
     // Add an API call here to submit the order data to the backend
+
+    useEffect(() => {
+        axios.get('http://localhost:7000/api/v1/customer/').then((customerRes) => {
+
+            if (customerRes?.data?.success) {
+                console.log("ghdsfgh : : ", customerRes?.data?.data);
+
+                setCustomers(customerRes?.data?.data)
+            }
+        })
+
+    }, []);
 
     return (
         <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px', border: '1px solid #ddd' }}>
